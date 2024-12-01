@@ -10,7 +10,7 @@ public class NetworkClient : MonoBehaviour
     NetworkPipeline reliableAndInOrderPipeline;
     NetworkPipeline nonReliableNotInOrderedPipeline;
     const ushort NetworkPort = 9001;
-    const string IPAddress = "127.0.0.1";
+    const string IPAddress = "10.0.0.82";
 
     void Start()
     {
@@ -27,7 +27,7 @@ public class NetworkClient : MonoBehaviour
         }
     }
 
-    public void OnDestroy()
+    void OnDestroy()
     {
         networkConnection.Disconnect(networkDriver);
         networkConnection = default(NetworkConnection);
