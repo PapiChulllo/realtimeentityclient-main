@@ -1,29 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 static public class NetworkClientProcessing
 {
+    static NetworkClient networkClient;
+    static GameLogic gameLogic;
 
-    #region Send and Receive Data Functions
     static public void ReceivedMessageFromServer(string msg, TransportPipeline pipeline)
     {
-        Debug.Log("Network msg received =  " + msg + ", from pipeline = " + pipeline);
-
         string[] csv = msg.Split(',');
         int signifier = int.Parse(csv[0]);
 
-        // if (signifier == ServerToClientSignifiers.asd)
-        // {
-
-        // }
-        // else if (signifier == ServerToClientSignifiers.asd)
-        // {
-
-        // }
-
-        //gameLogic.DoSomething();
-
+        if (signifier == ServerToClientSignifiers.SpawnBalloon)
+        {
+            float x = float.Parse(csv[1]);
+            float y = float.Parse(csv[2]);
+            gameLogic.SpawnNewBalloon(new Vector2(x, y));
+        }
+        else if (signifier == ServerToClientSignifiers.BalloonPopped)
+        {
+            int balloonIndex = int.Parse(csv[1]);
+            gameLogic.RemoveBalloon(balloonIndex);
+        }
     }
 
     static public void SendMessageToServer(string msg, TransportPipeline pipeline)
@@ -31,63 +28,46 @@ static public class NetworkClientProcessing
         networkClient.SendMessageToServer(msg, pipeline);
     }
 
-    #endregion
-
-    #region Connection Related Functions and Events
     static public void ConnectionEvent()
     {
-        Debug.Log("Network Connection Event!");
+        UnityEngine.Debug.Log("Network Connection Event!");
     }
+
     static public void DisconnectionEvent()
     {
-        Debug.Log("Network Disconnection Event!");
-    }
-    static public bool IsConnectedToServer()
-    {
-        return networkClient.IsConnected();
-    }
-    static public void ConnectToServer()
-    {
-        networkClient.Connect();
-    }
-    static public void DisconnectFromServer()
-    {
-        networkClient.Disconnect();
+        UnityEngine.Debug.Log("Network Disconnection Event!");
     }
 
-    #endregion
-
-    #region Setup
-    static NetworkClient networkClient;
-    static GameLogic gameLogic;
+    static public NetworkClient GetNetworkedClient()
+    {
+        return networkClient;
+    }
 
     static public void SetNetworkedClient(NetworkClient NetworkClient)
     {
         networkClient = NetworkClient;
     }
-    static public NetworkClient GetNetworkedClient()
-    {
-        return networkClient;
-    }
+
     static public void SetGameLogic(GameLogic GameLogic)
     {
         gameLogic = GameLogic;
     }
-
-    #endregion
-
 }
 
-#region Protocol Signifiers
+public enum TransportPipeline
+{
+    NotIdentified,
+    ReliableAndInOrder,
+    FireAndForget
+}
+
 static public class ClientToServerSignifiers
 {
-    public const int asd = 1;
+    public const int BalloonPopped = 1;
 }
 
 static public class ServerToClientSignifiers
 {
-    public const int asd = 1;
+    public const int SpawnBalloon = 1;
+    public const int BalloonPopped = 2;
 }
-
-#endregion
-

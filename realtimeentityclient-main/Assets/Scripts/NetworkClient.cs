@@ -1,7 +1,6 @@
 using UnityEngine;
-using UnityEngine.Assertions;
-using Unity.Collections;
 using Unity.Networking.Transport;
+using Unity.Collections;
 using System.Text;
 
 public class NetworkClient : MonoBehaviour
@@ -11,7 +10,7 @@ public class NetworkClient : MonoBehaviour
     NetworkPipeline reliableAndInOrderPipeline;
     NetworkPipeline nonReliableNotInOrderedPipeline;
     const ushort NetworkPort = 9001;
-    const string IPAddress = "192.168.2.41";
+    const string IPAddress = "127.0.0.1";
 
     void Start()
     {
@@ -23,7 +22,7 @@ public class NetworkClient : MonoBehaviour
         }
         else
         {
-            Debug.Log("Singleton-ish architecture violation detected, investigate where NetworkClient.cs Start() is being called.  Are you creating a second instance of the NetworkClient game object or has NetworkClient.cs been attached to more than one game object?");
+            UnityEngine.Debug.Log("Singleton-ish architecture violation detected. Check NetworkClient instances.");
             Destroy(this.gameObject);
         }
     }
@@ -39,17 +38,11 @@ public class NetworkClient : MonoBehaviour
     {
         networkDriver.ScheduleUpdate().Complete();
 
-        #region Check for client to server connection
-
         if (!networkConnection.IsCreated)
         {
-            Debug.Log("Client is unable to connect to server");
+            UnityEngine.Debug.Log("Client is unable to connect to server.");
             return;
         }
-
-        #endregion
-
-        #region Manage Network Events
 
         NetworkEvent.Type networkEventType;
         DataStreamReader streamReader;
@@ -83,8 +76,6 @@ public class NetworkClient : MonoBehaviour
                     break;
             }
         }
-
-        #endregion
     }
 
     private bool PopNetworkEventAndCheckForData(out NetworkEvent.Type networkEventType, out DataStreamReader streamReader, out NetworkPipeline pipelineUsedToSendEvent)
@@ -134,12 +125,4 @@ public class NetworkClient : MonoBehaviour
         networkConnection.Disconnect(networkDriver);
         networkConnection = default(NetworkConnection);
     }
-
-}
-
-public enum TransportPipeline
-{
-    NotIdentified,
-    ReliableAndInOrder,
-    FireAndForget
 }
