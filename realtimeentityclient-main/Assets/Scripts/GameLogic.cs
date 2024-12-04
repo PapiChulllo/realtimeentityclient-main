@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GameLogic : MonoBehaviour
 {
-    private List<GameObject> balloons = new List<GameObject>();
+    private Dictionary<int, GameObject> balloons = new Dictionary<int, GameObject>();
     private Sprite circleTexture;
 
     void Start()
@@ -11,7 +11,7 @@ public class GameLogic : MonoBehaviour
         NetworkClientProcessing.SetGameLogic(this);
     }
 
-    public void SpawnNewBalloon(Vector2 screenPosition)
+    public void SpawnNewBalloon(int balloonID, Vector2 screenPosition)
     {
         if (circleTexture == null)
             circleTexture = Resources.Load<Sprite>("Circle");
@@ -19,25 +19,21 @@ public class GameLogic : MonoBehaviour
         GameObject balloon = new GameObject("Balloon");
         balloon.AddComponent<SpriteRenderer>();
         balloon.GetComponent<SpriteRenderer>().sprite = circleTexture;
-        balloon.AddComponent<CircleClick>();
+        balloon.AddComponent<CircleClick>().balloonID = balloonID;
         balloon.AddComponent<CircleCollider2D>();
 
         Vector3 pos = Camera.main.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, 0));
         pos.z = 0;
         balloon.transform.position = pos;
-        balloons.Add(balloon);
+
+        balloons[balloonID] = balloon;
     }
 
-    public void RemoveBalloon(int balloonIndex)
+    public void RemoveBalloon(int balloonID)
     {
-        if (balloonIndex < 0 || balloonIndex >= balloons.Count) return;
+        if (!balloons.ContainsKey(balloonID)) return;
 
-        Destroy(balloons[balloonIndex]);
-        balloons.RemoveAt(balloonIndex);
-    }
-
-    public int GetBalloonIndex(GameObject balloon)
-    {
-        return balloons.IndexOf(balloon);
+        Destroy(balloons[balloonID]);
+        balloons.Remove(balloonID);
     }
 }

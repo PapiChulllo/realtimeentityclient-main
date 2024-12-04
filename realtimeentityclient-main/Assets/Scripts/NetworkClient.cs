@@ -3,6 +3,13 @@ using Unity.Networking.Transport;
 using Unity.Collections;
 using System.Text;
 
+public enum TransportPipeline
+{
+    NotIdentified,
+    ReliableAndInOrder,
+    FireAndForget
+}
+
 public class NetworkClient : MonoBehaviour
 {
     NetworkDriver networkDriver;
@@ -29,7 +36,10 @@ public class NetworkClient : MonoBehaviour
 
     void OnDestroy()
     {
-        networkConnection.Disconnect(networkDriver);
+        if (networkConnection.IsCreated)
+        {
+            networkConnection.Disconnect(networkDriver);
+        }
         networkConnection = default(NetworkConnection);
         networkDriver.Dispose();
     }
